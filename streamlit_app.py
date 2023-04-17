@@ -1,38 +1,39 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
+# Import the libraries
 import streamlit as st
+import requests
 
-"""
-# Welcome to Streamlit!
+# Set the title and logo of the app
+st.title("Ask Islam")
+st.image("logo.png")
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+# Create a text input box for the user's question
+question = st.text_input("Type your question here")
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Create a button to submit the question and generate the answer
+if st.button("Ask"):
+    # Connect to GPT-3 or another language model using an API
+    # For example, using OpenAI API
+    url = "https://api.openai.com/v1/engines/davinci/completions"
+    headers = {
+        "Authorization": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" # Replace with your own API key
+    }
+    data = {
+        "prompt": question + "\n\nAnswer from IslamQA:\n", # You can also add other sources like Bin Baz or Dorar.net
+        "max_tokens": 200,
+        "temperature": 0.5,
+        "stop": "\n"
+    }
+    response = requests.post(url, headers=headers, json=data)
+    result = response.json()
+    answer = result["choices"][0]["text"]
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+    # Display the answer and the source link
+    st.write(answer)
+    st.write("Source: https://islamqa.info/en") # You can also add other sources like Bin Baz or Dorar.net
 
-
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
-
-    Point = namedtuple('Point', 'x y')
-    data = []
-
-    points_per_turn = total_points / num_turns
-
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
-
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+# Create a feedback form for the user to rate the answer and provide their email address
+st.subheader("Please rate the answer and provide your email address for future updates and marketing")
+rating = st.selectbox("How satisfied are you with the answer?", ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very dissatisfied"])
+email = st.text_input("Email address")
+if st.button("Submit"):
+    st.write("Thank you for your feedback!")
